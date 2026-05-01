@@ -59,3 +59,5 @@ ml-service/coverage.xml
 ml-service/.coverage
 ai-agent-service/coverage.xml
 ai-agent-service/.coverage
+
+mongodb-data/
