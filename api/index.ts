@@ -2,7 +2,7 @@
 import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
 import { ValidationPipe, Logger, INestApplication } from '@nestjs/common';
-import { AppModule } from '../src/app.module';
+import { AppModule } from '../backend/src/app.module';
 
 process.removeAllListeners('warning');
 

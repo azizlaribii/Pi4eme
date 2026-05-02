@@ -1,9 +1,9 @@
 {
   "version": 2,
-  "buildCommand": "cd frontend && npm install && npm run build",
+  "buildCommand": "npm run build",
   "outputDirectory": "frontend/dist/frontend/browser",
   "functions": {
-    "backend/api/index.ts": {
+    "api/index.ts": {
       "runtime": "nodejs18.x",
       "maxDuration": 30
     }
@@ -11,7 +11,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/backend/api/index.ts"
+      "destination": "/api/index.ts"
     },
     {
       "source": "/(.*)",
