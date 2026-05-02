@@ -1,5 +1,7 @@
 {
   "version": 2,
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist/frontend/browser",
   "functions": {
     "backend/api/index.ts": {
       "runtime": "nodejs18.x",
