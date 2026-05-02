@@ -1,33 +1,34 @@
 // api/index.ts - COMPLETE FIXED VERSION
 import { NestFactory } from '@nestjs/core';
-import * as express from 'express';
 import cookieParser from 'cookie-parser';
-import { ValidationPipe, Logger } from '@nestjs/common';
+import { ValidationPipe, Logger, INestApplication } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
+
 process.removeAllListeners('warning');
+
+let cachedApp: INestApplication;
+
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+    if (!cachedApp) {
+        cachedApp = await NestFactory.create(AppModule);
 
-    app.use(cookieParser());
-    app.useGlobalPipes(new ValidationPipe({
-        transform: true,
-        whitelist: true
-    }));
+        cachedApp.use(cookieParser());
+        cachedApp.useGlobalPipes(new ValidationPipe({
+            transform: true,
+            whitelist: true
+        }));
 
-    await app.listen(3000);
-    Logger.log('API ready for Vercel!');
-
-    // ✅ EXPORT FOR VERCEL
-    return app;
+        await cachedApp.init(); // 👈 Use init() for serverless, not listen()
+        Logger.log('API initialized for Vercel!');
+    }
+    return cachedApp;
 }
 
-// ✅ VERCEL HANDLER - THIS IS REQUIRED!
+// ✅ VERCEL HANDLER
 export default async function handler(req: any, res: any) {
     const app = await bootstrap();
-
-    return new Promise<void>((resolve) => {
-        const server = app.getHttpAdapter().getInstance();
-        server.emit('request', req, res);
-        server.close(() => resolve());
-    });
+    const server = app.getHttpAdapter().getInstance();
+    
+    // Pass the request directly to the Express instance
+    server(req, res);
 }

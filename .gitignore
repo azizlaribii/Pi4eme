@@ -61,3 +61,5 @@ ai-agent-service/coverage.xml
 ai-agent-service/.coverage
 
 mongodb-data/
+.vercel
+.env*.local
