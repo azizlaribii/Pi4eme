@@ -1,41 +1,33 @@
+// api/index.ts - COMPLETE FIXED VERSION
 import { NestFactory } from '@nestjs/core';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { AppModule } from '../src/app.module';
-import express from 'express';
+import * as express from 'express';
 import cookieParser from 'cookie-parser';
+import { ValidationPipe, Logger } from '@nestjs/common';
+import { AppModule } from '../src/app.module';
 
-let cachedApp: NestExpressApplication;
+async function bootstrap() {
+    const app = await NestFactory.create(AppModule);
 
+    app.use(cookieParser());
+    app.useGlobalPipes(new ValidationPipe({
+        transform: true,
+        whitelist: true
+    }));
+
+    await app.listen(3000);
+    Logger.log('API ready for Vercel!');
+
+    // ✅ EXPORT FOR VERCEL
+    return app;
+}
+
+// ✅ VERCEL HANDLER - THIS IS REQUIRED!
 export default async function handler(req: any, res: any) {
-    try {
-        // Create app on cold start
-        if (!cachedApp) {
-            cachedApp = await NestFactory.create<NestExpressApplication>(
-                AppModule,
-                {
-                    logger: ['error', 'warn'], // Reduce logs in serverless
-                    bodyParser: false // Handle manually for file uploads
-                }
-            );
+    const app = await bootstrap();
 
-            cachedApp.enableCors({
-                origin: '*', // Adjust for production
-                credentials: true
-            });
-
-            cachedApp.use(cookieParser());
-            cachedApp.use(express.json({ limit: '10mb' }));
-            cachedApp.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-            await cachedApp.init();
-        }
-
-        // Handle request
-        const server = cachedApp.getHttpServer();
+    return new Promise<void>((resolve) => {
+        const server = app.getHttpAdapter().getInstance();
         server.emit('request', req, res);
-
-    } catch (error) {
-        console.error('Handler error:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
+        server.close(() => resolve());
+    });
 }
