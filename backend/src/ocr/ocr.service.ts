@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as FormData from 'form-data';
+import FormData from 'form-data';
 import axios from 'axios';
+
 
 @Injectable()
 export class OcrService {
